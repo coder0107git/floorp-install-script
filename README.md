@@ -1,49 +1,44 @@
-# Install tarball version of Floorp with just a basic script!
+# Install tarball version of Floorp 
 
-A script to easily install Floorp the tarball way on your Linux machine!
+Note: This installation script is not affiliated with Floorp project or its 
+maintainers in any way. If you encounter issues with this script, please 
+report them at <https://github.com/coder0107git/floorp-install-script/issues>.
 
-Note: This installation script is by no means affiliated with Floorp project, or its maintainers.
+If you are on Ubuntu or an Ubuntu-derived system, please consider using the 
+[offical Floorp PPA](https://docs.floorp.app/docs/installation/#gnulinux) 
+instead of this script.
 
 ## Usage
 
-Clone the repo and run the script
 ```bash
-
-git clone https://github.com/spookyorange/floorp-linux-install.git
+git clone https://github.com/coder0107git/floorp-linux-install.git
 cd floorp-linux-install
-sh ./install.sh
-
+bash ./install.sh
 ```
 
-To remove the application(if it has been installed with this method)
+To remove the application (if it has been installed with this method)
 ```bash
-
-sh ./uninstall.sh
-
+bash ./uninstall.sh
 ```
 
-Updates are handled by the app itself, if the app does not provide auto-updates, please change the version numbers in the install.sh(and open up a PR while you're at it (:)
+Future updates are already handled by Floorp, so you can delete this script 
+after installation. If the install script doesn't work by the time you try 
+it, please file an issue or open a PR.
 
-```bash
-
-sh ./install.sh
-
-```
 
 ## Details
 
-The script will install the application in the following destinations if you have installed locally:
+This script installs Floorp to the following paths:
 
 - ~/.tarball-installations/floorp
 - ~/.local/bin/floorp
 - ~/.local/share/applications/floorp.desktop
-- Also wherever the app data may be at(app decides it and it may change, also may depend on your machine configuration)
+
 
 ## Tested Distros
 
-- Fedora by Spookyorange
-- SteamOS(Steam Deck) by Spookyorange
+- Debian 12 by coder0107git
 
 ## Contributing
 
-If you have a distro that you would like to add to the list of tested distros, please submit a pull request with the changes you made to the script and the distro you tested it on.
+If you have a distro that you would like to add to the list of tested distros, please submit a pull request with any changes you may have made to the script and the distro you tested it on.

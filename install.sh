@@ -1,84 +1,87 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+set -euo pipefail
 
 app_name=floorp
-literal_name_of_installation_directory=".tarball-installations"
-universal_path_for_installation_directory="$HOME/$literal_name_of_installation_directory"
-app_installation_directory="$universal_path_for_installation_directory/floorp"
-official_package_location="https://github.com/Floorp-Projects/Floorp/releases/download/v11.15.0/floorp-11.15.0.linux-x86_64.tar.bz2"
-tar_location=$(mktemp /tmp/floorp.XXXXXX.tar.bz2)
-open_tar_application_data_location="floorp"
-local_bin_path="$HOME/.local/bin"
-local_application_path="$HOME/.local/share/applications"
-app_bin_in_local_bin="$local_bin_path/$app_name"
-desktop_in_local_applications="$local_application_path/$app_name.desktop"
-icon_path="$app_installation_directory/browser/chrome/icons/default/default128.png"
-executable_path=$app_installation_directory/floorp
+generic_tarball_installs_dir="$HOME/.tarball-installations"
+app_directory="$generic_tarball_installs_dir/floorp"
+app_symbolic_link="$HOME/.local/bin/$app_name"
+app_desktop_file="$HOME/.local/share/applications/$app_name.desktop"
+icon_path="$app_directory/browser/chrome/icons/default/default128.png"
+executable_path="$app_directory/floorp"
+
 
 echo "Welcome to Floorp tarball installer, just chill and wait for the installation to complete!"
 
+if [[ $EUID -eq 0 ]]; then
+  echo "This script should not be run as root. Exiting."
+  exit 1
+fi
+
 sleep 1
+
+
 
 echo "Checking to see if an older installation exists"
-if [ -f "$app_bin_in_local_bin" ]; then
-  echo "Old bin file detected, removing..."
-  rm "$app_bin_in_local_bin"
-fi
 
-if [ -d "$app_installation_directory" ]; then
-  echo "Old app files are found, removing..."
-  rm -rf "$app_installation_directory"
-fi
+function delete_file_if_found {
+  local file="$1"
+  local msg_if_found="$2"
 
-if [ -f "$desktop_in_local_applications" ]; then
-  echo "Old app files are found, removing..."
-  rm "$desktop_in_local_applications"
-fi
+  if [ -f "$file" ]; then
+    echo "$msg_if_found, removing..."
+
+    # Pause to allow people to kill the script if wanted
+    sleep 1
+
+    rm "$file"
+  fi
+}
+function delete_dir_if_found {
+  local dir="$1"
+  local msg_if_found="$2"
+
+  if [ -f "$dir" ]; then
+    echo "$msg_if_found, removing..."
+
+    # Pause to allow people to kill the script if wanted
+    sleep 1
+
+    rm -rf "$dir"
+  fi
+}
+
+delete_file_if_found "$app_symbolic_link" "Old Floorp symbolic link detected"
+delete_dir_if_found "$app_directory" "Old app installation directory found"
+delete_file_if_found "$app_desktop_file" "Old Floorp desktop file found"
 
 sleep 1
 
-echo "Installing the latest package"
-curl -L -o $tar_location $official_package_location
+
+if [ ! -d $generic_tarball_installs_dir ]; then
+  echo "Creating the $generic_tarball_installs_dir directory for installation"
+  mkdir $generic_tarball_installs_dir
+fi
+
+
+echo "Downloading and extracting the latest version of Floorp"
+curl -sLS https://github.com/Floorp-Projects/Floorp/releases/download/latest/floorp-linux-amd64.tar.xz | \
+  tar -xJv - -C "$app_directory"
 if [ $? -eq 0 ]; then
-    echo OK
+  echo "Installed and untarred successfully"
 else
-    echo "Installation failed. Curl not found or not installed"
-    exit
-fi
-
-tar -xvjf $tar_location
-
-echo "Installed and untarred successfully"
-
-if [ ! -d $universal_path_for_installation_directory ]; then
-  echo "Creating the $universal_path_for_installation_directory directory for installation"
-  mkdir $universal_path_for_installation_directory
-fi
-
-mv $open_tar_application_data_location $app_installation_directory
-
-echo "Floorp successfully moved to your safe place!"
-
-rm $tar_location
-
-if [ ! -d $local_bin_path ]; then
-  echo "$local_bin_path not found, creating it for you"
-  mkdir $local_bin_path
-fi
-
-touch $app_bin_in_local_bin
-chmod u+x $app_bin_in_local_bin
-echo "#!/bin/bash
-$executable_path" >> $app_bin_in_local_bin
-
-echo "Created executable for your \$PATH if you ever need"
-
-if [ ! -d $local_application_path ]; then
-  echo "Creating the $local_application_path directory for desktop file"
-  mkdir $local_application_path
+  echo "Downloading or extracting Floorp failed. Please verify that curl is installed and that you can access $app_directory."
+  exit 1
 fi
 
 
-touch $desktop_in_local_applications
+ln -s $executable_path $app_symbolic_link
+chmod u+x $app_symbolic_link
+echo "Created a symbolic link to Floorp at $app_symbolic_link"
+
+
+
+touch $app_desktop_file
 echo "
 [Desktop Entry]
 Name=Floorp
@@ -99,18 +102,11 @@ Exec=$executable_path --private-window %u
 [Desktop Action profile-manager-window]
 Name=Open the Profile Manager
 Exec=$executable_path --ProfileManager
-" >> $desktop_in_local_applications
+" >> $app_desktop_file
 
 echo "Created desktop entry successfully"
-
 sleep 1
 
-echo "Installation is successful"
 
-sleep 1
-
-echo "Done, and done, have fun!"
-
-sleep 1
-
+echo "Installation completed successfully"
 exit 0
