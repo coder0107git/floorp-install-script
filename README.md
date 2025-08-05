@@ -1,6 +1,6 @@
 # Install tarball version of Floorp 
 
-> [!DANGER]
+> [!CAUTION]
 > This forked version of the script is broken! Do not use! Use the orignal!
 
 Note: This installation script is not affiliated with Floorp project or its 
